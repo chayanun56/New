@@ -1,29 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Instrument Classifier // Synthwave Edition</title>
+    <title>Sports Ball Classifier // Slam Dunk Edition</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.4/dist/teachablemachine-image.min.js"></script>
+    <script src="https://cdn.jsdelivr.ly/npm/@teachablemachine/image@0.8.4/dist/teachablemachine-image.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee+Inline&family=Press+Start+2P&display=swap" rel="stylesheet">
     
     <style>
-        /* --- 🎨 CUSTOM UI THEME: SYNTHWAVE / FUTURISTIC 🎨 --- */
+        /* --- 🎨 CUSTOM UI THEME: SPORTS / ARCADE 🎨 --- */
         :root {
-            --bg-dark: #1a1a2e;
-            --bg-panel: #16213e;
-            --primary-glow: #0f3460;
-            --text-light: #e94560;
-            --text-secondary: #dcdcdc;
-            --accent-red: #ff3c5f;
-            --accent-blue: #00bfff;
-            --accent-yellow: #ffd700;
-            --shadow-glow-red: 0 0 15px rgba(255, 60, 95, 0.7);
-            --shadow-glow-blue: 0 0 15px rgba(0, 191, 255, 0.7);
+            --bg-dark: #0d1b2a;
+            --bg-panel: #1b263b;
+            --primary-glow: #415a77;
+            --text-light: #e0e1dd;
+            --text-secondary: #778da9;
+            --accent-basketball: #ff7b00;
+            --accent-soccer: #00ff7f;
+            --accent-baseball: #fff000;
+            --shadow-glow-orange: 0 0 15px rgba(255, 123, 0, 0.7);
+            --shadow-glow-green: 0 0 15px rgba(0, 255, 127, 0.7);
+            --shadow-glow-yellow: 0 0 15px rgba(255, 240, 0, 0.7);
         }
 
         @keyframes background-pan {
@@ -33,7 +34,7 @@
         }
 
         body {
-            font-family: 'Rajdhani', sans-serif;
+            font-family: 'Press Start 2P', cursive;
             text-align: center;
             margin: 0;
             padding: 20px;
@@ -41,27 +42,27 @@
             background-image: linear-gradient(315deg, var(--bg-dark) 0%, var(--primary-glow) 74%);
             background-size: 400% 400%;
             animation: background-pan 15s ease infinite;
-            color: var(--text-secondary);
+            color: var(--text-light);
         }
 
         .container {
             max-width: 900px;
             margin: 20px auto;
             padding: 30px;
-            background: rgba(22, 33, 62, 0.85);
+            background: rgba(27, 38, 59, 0.9);
             border-radius: 15px;
             border: 2px solid var(--primary-glow);
-            box-shadow: 0 0 25px rgba(15, 52, 96, 0.8), inset 0 0 10px rgba(15, 52, 96, 0.5);
+            box-shadow: 0 0 25px rgba(65, 90, 119, 0.8), inset 0 0 10px rgba(65, 90, 119, 0.5);
             backdrop-filter: blur(10px);
         }
 
         h1 {
-            font-family: 'Orbitron', sans-serif;
-            color: var(--text-light);
+            font-family: 'Bungee Inline', cursive;
+            color: var(--accent-baseball);
             margin-bottom: 30px;
             font-size: 2.5em;
             letter-spacing: 2px;
-            text-shadow: 0 0 5px var(--text-light), 0 0 10px var(--text-light), 0 0 15px #e94560;
+            text-shadow: 0 0 5px var(--accent-baseball), 0 0 10px var(--accent-baseball), 0 0 15px #fff000;
         }
         h1 i {
             margin-right: 15px;
@@ -78,7 +79,7 @@
         button {
             padding: 14px 28px;
             font-size: 1.1em;
-            font-family: 'Orbitron', sans-serif;
+            font-family: 'Press Start 2P', cursive;
             border: 2px solid transparent;
             border-radius: 8px;
             cursor: pointer;
@@ -88,18 +89,19 @@
             gap: 10px;
             position: relative;
             overflow: hidden;
+            text-shadow: 2px 2px 0px #000;
         }
         button i { font-size: 1.2em; }
         
-        .btn-start { background-color: var(--accent-blue); color: #fff; box-shadow: var(--shadow-glow-blue); }
-        .btn-stop { background-color: var(--accent-red); color: #fff; box-shadow: var(--shadow-glow-red); }
+        .btn-start { background-color: var(--accent-soccer); color: #000; box-shadow: var(--shadow-glow-green); }
+        .btn-stop { background-color: var(--accent-basketball); color: #000; box-shadow: var(--shadow-glow-orange); }
         
         button:hover {
             transform: translateY(-3px);
-            box-shadow: 0 0 25px rgba(0, 191, 255, 0.9);
+            box-shadow: 0 0 25px rgba(0, 255, 127, 0.9);
         }
         .btn-stop:hover {
-             box-shadow: 0 0 25px rgba(255, 60, 95, 0.9);
+             box-shadow: 0 0 25px rgba(255, 123, 0, 0.9);
         }
 
         #status-container {
@@ -107,16 +109,17 @@
             padding: 12px 25px;
             border-radius: 30px;
             font-weight: 600;
-            font-size: 1.1em;
+            font-size: 0.8em;
             display: inline-flex;
             align-items: center;
             gap: 10px;
             border: 1px solid;
             transition: all 0.3s ease;
+            text-shadow: 1px 1px 0px #000;
         }
         .status-badge-initial { background-color: #4a4a68; border-color: #7a7a9a; color: var(--text-secondary); }
-        .status-badge-success { background-color: #1c6b52; border-color: #28a745; color: #d4edda; box-shadow: 0 0 10px rgba(40, 167, 69, 0.7); }
-        .status-badge-error { background-color: #721c24; border-color: #dc3545; color: #f8d7da; box-shadow: 0 0 10px rgba(220, 53, 69, 0.7); }
+        .status-badge-success { background-color: #28a745; border-color: #28a745; color: #d4edda; box-shadow: 0 0 10px rgba(40, 167, 69, 0.7); }
+        .status-badge-error { background-color: #dc3545; border-color: #dc3545; color: #f8d7da; box-shadow: 0 0 10px rgba(220, 53, 69, 0.7); }
 
         #webcam-container {
             width: 100%;
@@ -125,13 +128,13 @@
             border-radius: 10px;
             overflow: hidden;
             background: #000;
-            border: 2px solid var(--accent-blue);
-            box-shadow: var(--shadow-glow-blue), inset 0 0 15px rgba(0, 191, 255, 0.5);
+            border: 2px solid var(--accent-soccer);
+            box-shadow: var(--shadow-glow-green), inset 0 0 15px rgba(0, 255, 127, 0.5);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: var(--accent-blue);
+            color: var(--accent-soccer);
         }
         #webcam-container canvas {
             max-width: 100%;
@@ -152,14 +155,15 @@
         .label-item {
             display: flex;
             align-items: center;
-            font-size: 1.2em;
-            color: var(--text-secondary);
+            font-size: 1em;
+            color: var(--text-light);
         }
         .label-name {
             flex-basis: 150px;
             min-width: 120px;
-            font-weight: 600;
-            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9em;
         }
         .progress-bar-container {
             flex-grow: 1;
@@ -185,9 +189,9 @@
         }
         
         /* --- 🎨 Progress Bar colors based on class 🎨 --- */
-        .progress-electric-guitar { background-color: var(--accent-red); box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
-        .progress-guitar-bass { background-color: var(--accent-blue); box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
-        .progress-piano { background-color: var(--accent-yellow); box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
+        .progress-basketball { background-color: var(--accent-basketball); box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
+        .progress-soccer-ball { background-color: var(--accent-soccer); box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
+        .progress-baseball { background-color: var(--accent-baseball); box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
         
         .progress-bar.predicted {
             animation: pulse 1s infinite;
@@ -202,7 +206,7 @@
 </head>
 <body>
     <div class="container">
-        <h1><i class="fas fa-satellite-dish"></i> Instrument Classifier</h1>
+        <h1><i class="fas fa-trophy"></i> Sports Ball Classifier</h1>
         <div class="controls">
             <button class="btn-start" onclick="init('environment')"><i class="fas fa-camera"></i> Rear Cam</button>
             <button class="btn-start" onclick="init('user')"><i class="fas fa-video"></i> Front Cam</button>
@@ -210,12 +214,12 @@
         </div>
 
         <div id="status-container" class="status-badge-initial">
-            <i class="fas fa-info-circle"></i> Status: STANDBY
+            <i class="fas fa-info-circle"></i> Status: READY
         </div>
         
         <div id="webcam-container">
-            <p>Awaiting Signal...</p>
-            <i class="fas fa-camera-retro fa-3x" style="margin-top: 15px; opacity: 0.6;"></i>
+            <p>Ready to Play!</p>
+            <i class="fas fa-basketball-ball fa-3x" style="margin-top: 15px; opacity: 0.6;"></i>
         </div>
         
         <div id="label-container"></div>
@@ -224,8 +228,8 @@
     <script type="text/javascript">
         // 🚨 สำคัญมาก! 🚨
         // ให้เอา URL ของโมเดล Teachable Machine ที่คุณสร้างเองมาใส่ที่นี่
-        const URL = "https://teachablemachine.withgoogle.com/models/Dkyi3w0qv/";
-        const MQTT_TOPIC = "New";
+        const URL = "https://teachablemachine.withgoogle.com/models/PXcJzPtr3/";
+        const MQTT_TOPIC = "New"; // เปลี่ยนชื่อหัวข้อ MQTT ให้เข้ากับโปรเจกต์มากขึ้น
 
         let model, webcam, maxPredictions;
         let mqttClient;
@@ -261,9 +265,9 @@
         }
         
         async function init(facingMode) {
-            if (isRunning || URL === "YOUR_TEACHABLE_MACHINE_MODEL_URL_HERE/") {
-                if (URL === "YOUR_TEACHABLE_MACHINE_MODEL_URL_HERE/") {
-                    alert("Please replace 'YOUR_TEACHABLE_MACHINE_MODEL_URL_HERE/' with your actual Teachable Machine model URL in the code.");
+            if (isRunning || URL === "https://teachablemachine.withgoogle.com/models/Dkyi3w0qv/") {
+                if (URL === "https://teachablemachine.withgoogle.com/models/Dkyi3w0qv/") {
+                    alert("Please replace the default model URL with your own Teachable Machine model URL.");
                 }
                 return;
             }
@@ -283,12 +287,10 @@
                 const classLabels = model.getClassLabels();
                 for (let i = 0; i < maxPredictions; i++) {
                     const classLabel = classLabels[i];
-                    // --- 💡 JS CHANGE 💡 ---
-                    // สร้างชื่อ class แบบง่ายๆ เพื่อใช้ใน CSS (เช่น "Electric Guitar" -> "electric-guitar")
+                    // Clean up the class name for use in CSS
                     const sanitizedClassName = classLabel.toLowerCase().replace(/\s+/g, '-');
                     const labelItem = document.createElement("div");
                     labelItem.classList.add('label-item');
-                    // เพิ่ม sanitizedClassName ให้กับ progress-bar
                     labelItem.innerHTML = `<span class="label-name">${classLabel}:</span><div class="progress-bar-container"><div class="progress-bar progress-${sanitizedClassName}" id="progress-${i}"></div></div>`;
                     labelContainer.appendChild(labelItem);
                 }
@@ -349,9 +351,12 @@
             if (highestProb >= confidenceThreshold) {
                 let commandToSend = null;
                 switch (predictedClass) {
-                    case "Electric Guitar": commandToSend = "RED"; break;
-                    case "Guitar Bass": commandToSend = "BLUE"; break;
-                    case "Piano": commandToSend = "YELLOW"; break;
+                    // --- 💡 JS CHANGE 💡 ---
+                    // เปลี่ยนชื่อคลาสให้ตรงกับโมเดลของคุณ
+                    case "Basketball": commandToSend = "BASKETBALL_DETECTED"; break;
+                    case "Soccer Ball": commandToSend = "SOCCER_DETECTED"; break;
+                    case "Baseball": commandToSend = "BASEBALL_DETECTED"; break;
+                    // เพิ่ม case อื่นๆ ที่คุณมีในโมเดล
                 }
 
                 if (commandToSend && commandToSend !== lastSentMessage) {
@@ -375,7 +380,7 @@
             isRunning = false;
             if (webcam) {
                 webcam.stop();
-                document.getElementById("webcam-container").innerHTML = `<p>Awaiting Signal...</p><i class="fas fa-camera-retro fa-3x" style="margin-top: 15px; opacity: 0.6;"></i>`;
+                document.getElementById("webcam-container").innerHTML = `<p>Ready to Play!</p><i class="fas fa-basketball-ball fa-3x" style="margin-top: 15px; opacity: 0.6;"></i>`;
                 document.getElementById("label-container").innerHTML = '';
             }
             if (mqttClient && mqttClient.isConnected()) { mqttClient.disconnect(); }
