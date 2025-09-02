@@ -4,7 +4,7 @@
     <title>Sports Ball Classifier // Slam Dunk Edition</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
-    <script src="https://cdn.jsdelivr.ly/npm/@teachablemachine/image@0.8.4/dist/teachablemachine-image.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.4/dist/teachablemachine-image.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,19 +12,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Bungee+Inline&family=Press+Start+2P&display=swap" rel="stylesheet">
     
     <style>
-        /* --- 🎨 CUSTOM UI THEME: SPORTS / ARCADE 🎨 --- */
+        /* --- 🎨 CUSTOM UI THEME: NEON SPORTS ARENA 🎨 --- */
         :root {
-            --bg-dark: #0d1b2a;
-            --bg-panel: #1b263b;
-            --primary-glow: #415a77;
-            --text-light: #e0e1dd;
-            --text-secondary: #778da9;
-            --accent-basketball: #ff7b00;
-            --accent-soccer: #00ff7f;
-            --accent-baseball: #fff000;
-            --shadow-glow-orange: 0 0 15px rgba(255, 123, 0, 0.7);
-            --shadow-glow-green: 0 0 15px rgba(0, 255, 127, 0.7);
-            --shadow-glow-yellow: 0 0 15px rgba(255, 240, 0, 0.7);
+            --bg-dark: #0a0a1a;
+            --bg-panel: #1a1a3a;
+            --primary-glow: #4a4afc;
+            --text-light: #f0f0ff;
+            --text-secondary: #aaaaff;
+            --accent-red: #ff3c3c;
+            --accent-blue: #00aaff;
+            --accent-yellow: #ffee00;
+            --shadow-glow-red: 0 0 20px rgba(255, 60, 60, 0.8);
+            --shadow-glow-blue: 0 0 20px rgba(0, 170, 255, 0.8);
+            --shadow-glow-yellow: 0 0 20px rgba(255, 238, 0, 0.8);
+            --shadow-glow-primary: 0 0 20px rgba(74, 74, 252, 0.7);
         }
 
         @keyframes background-pan {
@@ -39,33 +40,39 @@
             margin: 0;
             padding: 20px;
             background-color: var(--bg-dark);
-            background-image: linear-gradient(315deg, var(--bg-dark) 0%, var(--primary-glow) 74%);
+            background-image: linear-gradient(315deg, var(--bg-dark) 0%, #1a1a3a 74%);
             background-size: 400% 400%;
-            animation: background-pan 15s ease infinite;
+            animation: background-pan 20s ease infinite;
             color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
 
         .container {
+            width: 100%;
             max-width: 900px;
             margin: 20px auto;
             padding: 30px;
-            background: rgba(27, 38, 59, 0.9);
-            border-radius: 15px;
+            background: rgba(26, 26, 58, 0.85);
+            border-radius: 20px;
             border: 2px solid var(--primary-glow);
-            box-shadow: 0 0 25px rgba(65, 90, 119, 0.8), inset 0 0 10px rgba(65, 90, 119, 0.5);
-            backdrop-filter: blur(10px);
+            box-shadow: 0 0 35px var(--shadow-glow-primary), inset 0 0 15px rgba(74, 74, 252, 0.5);
+            backdrop-filter: blur(12px);
         }
 
         h1 {
             font-family: 'Bungee Inline', cursive;
-            color: var(--accent-baseball);
+            color: var(--text-light);
             margin-bottom: 30px;
             font-size: 2.5em;
             letter-spacing: 2px;
-            text-shadow: 0 0 5px var(--accent-baseball), 0 0 10px var(--accent-baseball), 0 0 15px #fff000;
+            text-shadow: 0 0 5px #fff, 0 0 10px var(--primary-glow), 0 0 15px var(--primary-glow);
         }
         h1 i {
             margin-right: 15px;
+            color: var(--accent-yellow);
         }
 
         .controls {
@@ -80,35 +87,67 @@
             padding: 14px 28px;
             font-size: 1.1em;
             font-family: 'Press Start 2P', cursive;
-            border: 2px solid transparent;
+            border: 2px solid var(--primary-glow);
+            background: transparent;
+            color: var(--text-light);
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            position: relative;
-            overflow: hidden;
-            text-shadow: 2px 2px 0px #000;
+            text-shadow: 0 0 5px var(--primary-glow);
         }
-        button i { font-size: 1.2em; }
-        
-        .btn-start { background-color: var(--accent-soccer); color: #000; box-shadow: var(--shadow-glow-green); }
-        .btn-stop { background-color: var(--accent-basketball); color: #000; box-shadow: var(--shadow-glow-orange); }
-        
         button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0 25px rgba(0, 255, 127, 0.9);
+            background: var(--primary-glow);
+            color: var(--bg-dark);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 0 25px var(--shadow-glow-primary);
         }
-        .btn-stop:hover {
-             box-shadow: 0 0 25px rgba(255, 123, 0, 0.9);
+
+        .main-content {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .left-panel {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(10, 10, 30, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--primary-glow);
+        }
+
+        #webcam-container {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+            border: 2px solid var(--primary-glow);
+            box-shadow: inset 0 0 15px rgba(74, 74, 252, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+         #webcam-container canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         #status-container {
-            margin: 25px auto;
             padding: 12px 25px;
-            border-radius: 30px;
-            font-weight: 600;
+            border-radius: 8px;
             font-size: 0.8em;
             display: inline-flex;
             align-items: center;
@@ -121,108 +160,93 @@
         .status-badge-success { background-color: #28a745; border-color: #28a745; color: #d4edda; box-shadow: 0 0 10px rgba(40, 167, 69, 0.7); }
         .status-badge-error { background-color: #dc3545; border-color: #dc3545; color: #f8d7da; box-shadow: 0 0 10px rgba(220, 53, 69, 0.7); }
 
-        #webcam-container {
-            width: 100%;
-            height: 240px;
-            margin: 20px auto;
-            border-radius: 10px;
-            overflow: hidden;
-            background: #000;
-            border: 2px solid var(--accent-soccer);
-            box-shadow: var(--shadow-glow-green), inset 0 0 15px rgba(0, 255, 127, 0.5);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: var(--accent-soccer);
+        /* --- 💡 NEW INDICATOR LIGHT 💡 --- */
+        #indicator-light-container h3 {
+            margin-bottom: 20px;
+            font-size: 1em;
+            color: var(--text-secondary);
         }
-        #webcam-container canvas {
-            max-width: 100%;
-            height: auto;
-            display: block;
+        #indicator-light {
+            width: 100px;
+            height: 100px;
+            background-color: #1a1a3a;
+            border-radius: 50%;
+            border: 5px solid var(--text-secondary);
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+        #indicator-light.red {
+            background-color: var(--accent-red);
+            border-color: var(--accent-red);
+            box-shadow: var(--shadow-glow-red);
+        }
+        #indicator-light.blue {
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue);
+            box-shadow: var(--shadow-glow-blue);
+        }
+        #indicator-light.yellow {
+            background-color: var(--accent-yellow);
+            border-color: var(--accent-yellow);
+            box-shadow: var(--shadow-glow-yellow);
         }
 
+
         #label-container {
-            margin-top: 30px;
-            background: rgba(10, 10, 20, 0.4);
+            background: rgba(10, 10, 30, 0.4);
             padding: 20px;
             border-radius: 8px;
             display: flex;
             flex-direction: column;
             gap: 15px;
             text-align: left;
-        }
-        .label-item {
-            display: flex;
-            align-items: center;
-            font-size: 1em;
-            color: var(--text-light);
-        }
-        .label-name {
-            flex-basis: 150px;
-            min-width: 120px;
-            font-weight: bold;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.9em;
-        }
-        .progress-bar-container {
-            flex-grow: 1;
-            height: 24px;
-            background-color: #1a1a2e;
-            border-radius: 5px;
-            overflow: hidden;
             border: 1px solid var(--primary-glow);
         }
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            border-radius: 4px;
-            transition: width 0.2s ease-out;
-            display: flex;
-            align-items: center;
-            font-weight: bold;
-            justify-content: flex-end;
-            padding-right: 8px;
-            box-sizing: border-box;
-            color: #000;
-            text-shadow: 0 0 2px rgba(255,255,255,0.5);
-        }
+        .label-item { display: flex; align-items: center; font-size: 1em; }
+        .label-name { flex-basis: 150px; min-width: 120px; font-size: 0.9em; }
+        .progress-bar-container { flex-grow: 1; height: 24px; background-color: #1a1a2e; border-radius: 5px; overflow: hidden; border: 1px solid var(--primary-glow); }
+        .progress-bar { height: 100%; width: 0%; border-radius: 4px; transition: width 0.2s ease-out; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; box-sizing: border-box; color: #000; text-shadow: 0 0 2px rgba(255,255,255,0.5); }
         
-        /* --- 🎨 Progress Bar colors based on class 🎨 --- */
-        .progress-basketball { background-color: var(--accent-basketball); box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
-        .progress-soccer-ball { background-color: var(--accent-soccer); box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
-        .progress-baseball { background-color: var(--accent-baseball); box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
+        .progress-basketball { background: linear-gradient(90deg, #ff7b00, #ff4800); }
+        .progress-soccer-ball { background: linear-gradient(90deg, #00aaff, #0077ff); }
+        .progress-baseball { background: linear-gradient(90deg, #ffee00, #ffc800); }
         
-        .progress-bar.predicted {
-            animation: pulse 1s infinite;
-        }
+        .progress-bar.predicted { animation: pulse 1s infinite; }
         
         @keyframes pulse {
             0% { filter: brightness(1); }
-            50% { filter: brightness(1.5); }
+            50% { filter: brightness(1.6); }
             100% { filter: brightness(1); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1><i class="fas fa-trophy"></i> Sports Ball Classifier</h1>
+        <h1><i class="fas fa-trophy"></i> Ball Classifier</h1>
+        
         <div class="controls">
-            <button class="btn-start" onclick="init('environment')"><i class="fas fa-camera"></i> Rear Cam</button>
-            <button class="btn-start" onclick="init('user')"><i class="fas fa-video"></i> Front Cam</button>
-            <button class="btn-stop" onclick="stop()"><i class="fas fa-power-off"></i> Power Off</button>
+            <button onclick="init('environment')"><i class="fas fa-camera"></i> Rear Cam</button>
+            <button onclick="init('user')"><i class="fas fa-video"></i> Front Cam</button>
+            <button onclick="stop()"><i class="fas fa-power-off"></i> Power Off</button>
         </div>
 
-        <div id="status-container" class="status-badge-initial">
-            <i class="fas fa-info-circle"></i> Status: READY
+        <div class="main-content">
+            <div class="left-panel">
+                <div id="webcam-container">
+                     <i class="fas fa-basketball-ball fa-4x" style="opacity: 0.4;"></i>
+                </div>
+                <div id="status-container" class="status-badge-initial">
+                    <i class="fas fa-info-circle"></i> Status: READY
+                </div>
+                <div id="label-container"></div>
+            </div>
+            <div class="right-panel">
+                <div id="indicator-light-container">
+                    <h3>DETECTION SIGNAL</h3>
+                    <div id="indicator-light"></div>
+                </div>
+            </div>
         </div>
-        
-        <div id="webcam-container">
-            <p>Ready to Play!</p>
-            <i class="fas fa-basketball-ball fa-3x" style="margin-top: 15px; opacity: 0.6;"></i>
-        </div>
-        
-        <div id="label-container"></div>
     </div>
 
     <script type="text/javascript">
@@ -235,6 +259,8 @@
         let mqttClient;
         let lastSentMessage = "";
         let isRunning = false;
+        
+        const indicatorLight = document.getElementById('indicator-light');
 
         function updateStatus(message, type = "initial") {
             const statusDiv = document.getElementById("status-container");
@@ -248,6 +274,28 @@
             statusDiv.className = `status-badge-${type}`;
         }
         
+        // --- 💡 JS CHANGE 💡 ---
+        // ฟังก์ชันใหม่สำหรับควบคุมไฟสถานะ
+        function updateIndicatorLight(predictedClass) {
+            // Reset class ทั้งหมดก่อน
+            indicatorLight.className = 'indicator-light';
+
+            switch (predictedClass) {
+                case "Basketball":
+                    indicatorLight.classList.add('red');
+                    break;
+                case "Soccer Ball":
+                    indicatorLight.classList.add('blue');
+                    break;
+                case "Baseball":
+                    indicatorLight.classList.add('yellow');
+                    break;
+                default:
+                    // ถ้าไม่มีคลาสที่ตรง, ไฟจะกลับไปสถานะปกติ (off)
+                    break;
+            }
+        }
+
         function connectMQTT() {
             return new Promise((resolve, reject) => {
                 updateStatus("Connecting to MQTT...");
@@ -287,7 +335,6 @@
                 const classLabels = model.getClassLabels();
                 for (let i = 0; i < maxPredictions; i++) {
                     const classLabel = classLabels[i];
-                    // Clean up the class name for use in CSS
                     const sanitizedClassName = classLabel.toLowerCase().replace(/\s+/g, '-');
                     const labelItem = document.createElement("div");
                     labelItem.classList.add('label-item');
@@ -296,7 +343,7 @@
                 }
 
                 updateStatus("Initializing Camera...");
-                webcam = new tmImage.Webcam(320, 240, false);
+                webcam = new tmImage.Webcam(400, 300, false); // Increased resolution
                 await webcam.setup({ facingMode: facingMode || "environment" });
                 await webcam.play();
 
@@ -350,13 +397,14 @@
             const confidenceThreshold = 0.95;
             if (highestProb >= confidenceThreshold) {
                 let commandToSend = null;
+                 // --- 💡 JS CHANGE 💡 ---
+                 // เรียกใช้ฟังก์ชันเปลี่ยนสีไฟพร้อมส่งชื่อคลาสที่ทำนายได้
+                updateIndicatorLight(predictedClass);
+
                 switch (predictedClass) {
-                    // --- 💡 JS CHANGE 💡 ---
-                    // เปลี่ยนชื่อคลาสให้ตรงกับโมเดลของคุณ
                     case "Basketball": commandToSend = "BASKETBALL_DETECTED"; break;
                     case "Soccer Ball": commandToSend = "SOCCER_DETECTED"; break;
                     case "Baseball": commandToSend = "BASEBALL_DETECTED"; break;
-                    // เพิ่ม case อื่นๆ ที่คุณมีในโมเดล
                 }
 
                 if (commandToSend && commandToSend !== lastSentMessage) {
@@ -373,6 +421,10 @@
                         }
                     }, 5000);
                 }
+            } else {
+                 // --- 💡 JS CHANGE 💡 ---
+                 // ถ้าความมั่นใจต่ำกว่าเกณฑ์ ให้ไฟดับ (ส่งค่าว่าง)
+                updateIndicatorLight(null);
             }
         }
 
@@ -380,11 +432,13 @@
             isRunning = false;
             if (webcam) {
                 webcam.stop();
-                document.getElementById("webcam-container").innerHTML = `<p>Ready to Play!</p><i class="fas fa-basketball-ball fa-3x" style="margin-top: 15px; opacity: 0.6;"></i>`;
+                document.getElementById("webcam-container").innerHTML = `<i class="fas fa-basketball-ball fa-4x" style="opacity: 0.4;"></i>`;
                 document.getElementById("label-container").innerHTML = '';
             }
             if (mqttClient && mqttClient.isConnected()) { mqttClient.disconnect(); }
             updateStatus("System Offline", "initial");
+            // ทำให้ไฟสถานะกลับเป็นค่าเริ่มต้นเมื่อหยุดทำงาน
+            updateIndicatorLight(null);
         }
         
         window.addEventListener('beforeunload', stop);
