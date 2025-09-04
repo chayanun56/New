@@ -300,7 +300,7 @@
             return new Promise((resolve, reject) => {
                 updateStatus("Connecting to MQTT...");
                 const clientId = "web_" + Math.floor(Math.random() * 10000);
-                mqttClient = new Paho.MQTT.Client("broker.hivemq.com", 1883, "/mqtt", clientId);
+                mqttClient = new Paho.MQTT.Client("broker.hivemq.com", 8884, "/mqtt", clientId);
                 mqttClient.onConnectionLost = (responseObject) => {
                     if (isRunning) { setTimeout(() => connectMQTT().catch(() => {}), 5000); }
                 };
