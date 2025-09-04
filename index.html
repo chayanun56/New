@@ -300,12 +300,15 @@
             return new Promise((resolve, reject) => {
                 updateStatus("Connecting to MQTT...");
                 const clientId = "web_" + Math.floor(Math.random() * 10000);
-                mqttClient = new Paho.MQTT.Client("broker.hivemq.com", 8884, "/mqtt", clientId);
+                // ✅ *** จุดที่ 1: เปลี่ยน Port เป็น 8000 ***
+                mqttClient = new Paho.MQTT.Client("broker.hivemq.com", 8000, "/mqtt", clientId);
                 mqttClient.onConnectionLost = (responseObject) => {
                     if (isRunning) { setTimeout(() => connectMQTT().catch(() => {}), 5000); }
                 };
                 mqttClient.connect({
-                    useSSL: true, timeout: 30,
+                    // ✅ *** จุดที่ 2: ปิด SSL ***
+                    useSSL: false, 
+                    timeout: 30,
                     onSuccess: () => { updateStatus("MQTT Link Active", "success"); resolve(); },
                     onFailure: (e) => { updateStatus("MQTT Link Failed", "error"); reject(e); }
                 });
